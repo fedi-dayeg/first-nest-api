@@ -15,8 +15,8 @@ describe('Authentication System', () => {
     await app.init();
   });
 
-  it('handles a signup request', () => {
-    const email = 'asaqsaasdf@gmail.com';
+  /*  it('handles a signup request', () => {
+    const email = 'asaqaasahhaaqgasdf@gmail.com';
     return request(app.getHttpServer())
       .post('/auth/signup')
       .send({ email: email, password: '1234' })
@@ -26,5 +26,20 @@ describe('Authentication System', () => {
         expect(id).toBeDefined();
         expect(email).toEqual(email);
       });
+  });*/
+  it('signup a new user then get the currently logged in user', async () => {
+    const email = 'asaqaasahhgasdf@gmail.com';
+    const res = await request(app.getHttpServer())
+      .post('/auth/signup')
+      .send({ email, password: '1234' })
+      .expect(201);
+
+    const cookies = res.get('Set-Cookie');
+    const { body } = await request(app.getHttpServer())
+      .get('/auth/whoami')
+      .set('Cookie', cookies)
+      .expect(200);
+
+    expect(body.email).toEqual(email);
   });
 });

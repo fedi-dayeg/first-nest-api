@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { Report } from './reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cookieSession = require('cookie-session');
 @Module({
@@ -21,7 +22,27 @@ const cookieSession = require('cookie-session');
     },
   ],
   imports: [
-    TypeOrmModule.forRoot({
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        return {
+          type: 'postgres',
+          database: config.get<string>('DB_NAME'),
+          host: '127.0.0.1',
+          port: 5432,
+          username: 'postgres',
+          password: 'root',
+          synchronize: true,
+          entities: [User, Report],
+          keepConnectionAlive: true,
+        };
+      },
+    }),
+    /* TypeOrmModule.forRoot({
       type: 'postgres',
       host: '127.0.0.1',
       database: 'db',
@@ -30,7 +51,7 @@ const cookieSession = require('cookie-session');
       password: 'root',
       synchronize: true,
       entities: [User, Report],
-    }),
+    }),*/
     UsersModule,
     ReportsModule,
   ],
